@@ -1,5 +1,6 @@
 from src.pin import *
 
+from aw._gpio import h616_gpio
 
 class Pin(PIN_father):
 

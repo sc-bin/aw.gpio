@@ -1,6 +1,6 @@
 #include <Python.h>
 
-
+#include "h616_py.h"
 
 
 static PyObject *py_check(PyObject *self, PyObject *args)
@@ -35,6 +35,11 @@ PyMODINIT_FUNC PyInit__gpio(void)
     if ((module = PyModule_Create(&awgpiomodule)) == NULL)
         return NULL;
     // PyModule_AddObject(module, "PWM", (PyObject*)&PWMType);
+    PyObject *obj_p;
+
+    obj_p = h616_get_pobj_oper();
+    Py_INCREF(obj_p);
+    PyModule_AddObject(module, "h616_gpio", obj_p);
 
     return module;
 }

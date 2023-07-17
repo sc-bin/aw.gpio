@@ -1,7 +1,5 @@
 
 class PIN_father:
-    """Pins dont exist in CPython so...lets make our own!"""
-
     IN = 0
     OUT = 1
     LOW = 0
@@ -14,6 +12,7 @@ class PIN_father:
     _value = LOW
     _mode = IN
 
+    # 需要在子类中定义这3个函数
     setup = None
     output = None
     input = None
