@@ -13,12 +13,15 @@ class PIN_father:
     _mode = IN
 
     # 需要在子类中定义这3个函数
-    setup = None
-    output = None
-    input = None
+    _setup = None
+    _output = None
+    _input = None
 
     def __init__(self, pin_name):
-        self.id = pin_name
+        if isinstance(pin_name, tuple):
+            self.id = int(pin_name[1])
+        else:
+            self.id = int(pin_name)
 
     def __repr__(self):
         return str(self.id)
@@ -32,12 +35,12 @@ class PIN_father:
             if mode == self.IN:
                 self._mode = self.IN
                 # GPIO.setup(self.id, GPIO.IN)
-                self.setup(self.id, self.IN)
+                self._setup(self.id, self.IN)
 
             elif mode == self.OUT:
                 self._mode = self.OUT
                 # GPIO.setup(self.id, GPIO.OUT)
-                self.setup(self.id, self.OUT)
+                self._setup(self.id, self.OUT)
 
             else:
                 raise RuntimeError("Invalid mode for pin: %s" % self.id)
@@ -46,12 +49,12 @@ class PIN_father:
                 raise RuntimeError("Cannot set pull resistor on output")
             if pull == self.PULL_UP:
                 # GPIO.setup(self.id, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-                self.setup(self.id, self.IN, pull_up_down=self.PULL_UP)
+                self._setup(self.id, self.IN, pull_up_down=self.PULL_UP)
                 
 
             elif pull == self.PULL_DOWN:
                 # GPIO.setup(self.id, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-                self.setup(self.id, self.IN, pull_up_down=self.PULL_DOWN)
+                self._setup(self.id, self.IN, pull_up_down=self.PULL_DOWN)
 
                 pass
             else:
@@ -63,15 +66,15 @@ class PIN_father:
             if val == self.LOW:
                 self._value = val
                 # GPIO.output(self.id, val)
-                self.output(self.id, val)
+                self._output(self.id, val)
 
             elif val == self.HIGH:
                 self._value = val
                 # GPIO.output(self.id, val)
-                self.output(self.id, val)
+                self._output(self.id, val)
 
             else:
                 raise RuntimeError("Invalid value for pin")
             return None
-        return self.input(self.id)
+        return self._input(self.id)
         # return GPIO.input(self.id)
