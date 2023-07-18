@@ -49,7 +49,7 @@ static const char moduledocstring[] = "GPIO functionality of allwinner h616";
 PyMethodDef h616_methods[] = {
     {"write", py_write, METH_VARARGS, "write value to gpio"},
     {"read", py_read, METH_VARARGS, "read value from gpio"},
-    {"set_PullUpDn", py_set_PullUpDn, METH_VARARGS, "set the gpio with pullup or pulldown"},
+    {"set_pullUpDn", py_set_PullUpDn, METH_VARARGS, "set the gpio with pullup or pulldown"},
     {"set_mode", py_set_mode, METH_VARARGS, "set the gpio mode with in or out"},
     {NULL, NULL, 0, NULL},
 };
