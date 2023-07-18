@@ -1,8 +1,6 @@
 #include <Python.h>
 
-#include "h616_py.h"
-
-
+#include "common.h"
 static PyObject *py_check(PyObject *self, PyObject *args)
 {
     printf("输出\r\n");
@@ -13,7 +11,7 @@ static PyObject *py_check(PyObject *self, PyObject *args)
 
 static const char moduledocstring[] = "GPIO functionality of allwinner chips using Python";
 
-PyMethodDef aw_gpio_methods[] = {
+PyMethodDef h616_methods[] = {
     {"go", py_check, METH_VARARGS, "check"},
     {NULL, NULL, 0, NULL},
 };
@@ -22,7 +20,7 @@ static struct PyModuleDef awgpiomodule = {
     "aw._gpio",      // name of module
     moduledocstring, // module documentation, may be NULL
     -1,              // size of per-interpreter state of the module, or -1 if the module keeps state in global variables.
-    aw_gpio_methods
+    h616_methods
 };
 
 
@@ -34,12 +32,8 @@ PyMODINIT_FUNC PyInit__gpio(void)
 
     if ((module = PyModule_Create(&awgpiomodule)) == NULL)
         return NULL;
-    // PyModule_AddObject(module, "PWM", (PyObject*)&PWMType);
-    PyObject *obj_p;
+    define_commons(module);
 
-    obj_p = h616_get_pobj_oper();
-    Py_INCREF(obj_p);
-    PyModule_AddObject(module, "h616_gpio", obj_p);
-
+    PyModule_AddObject(module, "num", Py_BuildValue("i", 666));   // deprecated
     return module;
 }

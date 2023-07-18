@@ -1,7 +1,10 @@
 from src.pin import *
 
-from aw._gpio import h616_gpio
+# from aw._gpio import h616_gpio
+import aw._h616 as gpio
 
+print("H616.py")
+gpio.write(45,1)
 class Pin(PIN_father):
 
     # self.setup(self.id, self.IN, pull_up_down=self.PUD_UP)

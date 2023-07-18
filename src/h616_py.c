@@ -1,54 +1,74 @@
-#include "h616_py.h"
+#include <Python.h>
 
+#include "h616_gpio.h"
+#include "common.h"
 
-
-
-static PyMethodDef
-    gpio_methods[] = {
-        {NULL},
-};
-
-PyTypeObject GPIOType = {
-    PyVarObject_HEAD_INIT(NULL, 0) "aw.gpio.h616_gpio", // tp_name
-    0,                                                  // tp_basicsize
-    0,                                                  // tp_itemsize
-    0,                            // tp_dealloc
-    0,                                                  // tp_print
-    0,                                                  // tp_getattr
-    0,                                                  // tp_setattr
-    0,                                                  // tp_compare
-    0,                                                  // tp_repr
-    0,                                                  // tp_as_number
-    0,                                                  // tp_as_sequence
-    0,                                                  // tp_as_mapping
-    0,                                                  // tp_hash
-    0,                                                  // tp_call
-    0,                                                  // tp_str
-    0,                                                  // tp_getattro
-    0,                                                  // tp_setattro
-    0,                                                  // tp_as_buffer
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,           // tp_flag
-    "operation functions of gpio",                      // tp_doc
-    0,                                                  // tp_traverse
-    0,                                                  // tp_clear
-    0,                                                  // tp_richcompare
-    0,                                                  // tp_weaklistoffset
-    0,                                                  // tp_iter
-    0,                                                  // tp_iternext
-    gpio_methods,                                        // tp_methods
-    0,                                                  // tp_members
-    0,                                                  // tp_getset
-    0,                                                  // tp_base
-    0,                                                  // tp_dict
-    0,                                                  // tp_descr_get
-    0,                                                  // tp_descr_set
-    0,                                                  // tp_dictoffset
-    0,                                                  // tp_init
-    0,                                                  // tp_alloc
-    0,                                                  // tp_new
-};
-
-PyTypeObject *h616_get_pobj_oper(void)
+static PyObject *py_write(PyObject *self, PyObject *args)
 {
-    return &GPIOType;
+    int ret;
+    int gpio_num, value;
+    ret = PyArg_ParseTuple(args, "ii", &gpio_num, &value);
+
+    // printf("ret=%d\r\n", ret);
+    // printf("gpio_num=%d\r\n", gpio_num);
+    // printf("value=%d\r\n", value);
+
+    gpio_write(gpio_num, value);
+
+    Py_RETURN_NONE;
+}
+static PyObject *py_read(PyObject *self, PyObject *args)
+{
+    int ret;
+    int gpio_num;
+    ret = PyArg_ParseTuple(args, "i", &gpio_num);
+
+    return Py_BuildValue("i", gpio_read(gpio_num));
+}
+static PyObject *py_set_PullUpDn(PyObject *self, PyObject *args)
+{
+    int ret;
+    int gpio_num, pud;
+    ret = PyArg_ParseTuple(args, "ii", &gpio_num, &pud);
+
+    gpio_set_PullUpDn(gpio_num, pud);
+
+    Py_RETURN_NONE;
+}
+static PyObject *py_set_mode(PyObject *self, PyObject *args)
+{
+   int ret;
+    int gpio_num, mode;
+    ret = PyArg_ParseTuple(args, "ii", &gpio_num, &mode);
+    pin_set_mode(gpio_num, mode);
+    Py_RETURN_NONE;
+}
+
+static const char moduledocstring[] = "GPIO functionality of allwinner h616";
+
+PyMethodDef h616_methods[] = {
+    {"write", py_write, METH_VARARGS, "write value to gpio"},
+    {"read", py_read, METH_VARARGS, "read value from gpio"},
+    {"set_PullUpDn", py_set_PullUpDn, METH_VARARGS, "set the gpio with pullup or pulldown"},
+    {"set_mode", py_set_mode, METH_VARARGS, "set the gpio mode with in or out"},
+    {NULL, NULL, 0, NULL},
+};
+static struct PyModuleDef awgpiomodule = {
+    PyModuleDef_HEAD_INIT,
+    "aw._h616",      // name of module
+    moduledocstring, // module documentation, may be NULL
+    -1,              // size of per-interpreter state of the module, or -1 if the module keeps state in global variables.
+    h616_methods};
+
+// 在import时会被调出来执行
+PyMODINIT_FUNC PyInit__h616(void)
+{
+    printf("PyInit__h616\r\n");
+    PyObject *module = NULL;
+
+    if ((module = PyModule_Create(&awgpiomodule)) == NULL)
+        return NULL;
+    define_commons(module);
+
+    return module;
 }

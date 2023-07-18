@@ -18,7 +18,9 @@ setup(
     license          = 'MIT',
     url="https://github.com/sc-bin/aw.gpio", 
     packages=['aw','aw.gpio'],
-    ext_modules = [Extension('aw._gpio', ['src/init.c', 'src/h616_gpio.c', 'src/h616_py.c'])],
+    ext_modules = [Extension('aw._gpio', ['src/init.c']),
+                   Extension('aw._h616', ['src/h616_gpio.c', 'src/h616_py.c', 'src/common.c']),
+                   ],
 
 
 )

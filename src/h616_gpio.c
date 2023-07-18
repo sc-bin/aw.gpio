@@ -19,22 +19,18 @@
 #include <sys/wait.h>
 #include <sys/ioctl.h>
 
+#define SUNXI_PUD_OFF 0
+#define SUNXI_PUD_UP 1
+#define SUNXI_PUD_DOWN 2
 
-
-
-#define SUNXI_PUD_OFF   0
-#define SUNXI_PUD_UP    1
-#define SUNXI_PUD_DOWN  2
-
-
-#define GPIO_BIT(x)                        (1UL << (x))
-
+#define GPIO_BIT(x) (1UL << (x))
 
 #define MEN_GPIOA_BASE 0x0300B000
 #define MEN_GPIOL_BASE 0x07022000
 
 #define BLOCK_SIZE 1024
 uint32_t MAP_MASK = 0Xfff;
+
 
 static void write_mem_gpio(unsigned int val, unsigned int addr)
 {
@@ -100,7 +96,6 @@ void gpio_write(int pin, int value)
     }
 }
 
-
 int gpio_read(int gpio_num)
 {
 
@@ -162,7 +157,7 @@ void gpio_set_PullUpDn(int gpio_num, int pud)
         phyaddr = pullOffset + MEN_GPIOA_BASE + (bank * 36) + ((index >> 4) << 2);
 
     regval = read_mem_gpio(phyaddr);
-   
+
     /* clear bit */
     regval &= ~(3 << offset);
 
@@ -192,7 +187,7 @@ void pin_set_mode(int gpio_num, int mode)
         phyaddr = MEN_GPIOA_BASE + (bank * 36) + ((index >> 3) << 2);
 
     regval = read_mem_gpio(phyaddr);
-   
+
     if (-1 == gpio_num)
     {
         printf("[%s:L%d] the pin:%d is invaild,please check it over!\n",
@@ -238,8 +233,6 @@ int main()
     //     printf("val = %d\r\n", gpio_read(269));
     //     sleep(1);
     // }
-    
-
 
     return 0;
 }
