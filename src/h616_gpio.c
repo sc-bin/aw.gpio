@@ -47,6 +47,7 @@ static void write_mem_gpio(unsigned int val, unsigned int addr)
     uint32_t mmap_seek = ((addr - mmap_base) >> 2);
 
     *(mmap_gpio + mmap_seek) = val;
+    close(fd_mem);
 }
 
 static unsigned int read_mem_gpio(unsigned int addr)
@@ -64,6 +65,7 @@ static unsigned int read_mem_gpio(unsigned int addr)
     uint32_t mmap_base = (addr & ~MAP_MASK);
     uint32_t mmap_seek = ((addr - mmap_base) >> 2);
     val = *(mmap_gpio + mmap_seek);
+    close(fd_mem);
     return val;
 }
 

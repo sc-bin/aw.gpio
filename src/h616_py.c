@@ -63,7 +63,7 @@ static struct PyModuleDef awgpiomodule = {
 // 在import时会被调出来执行
 PyMODINIT_FUNC PyInit__h616(void)
 {
-    printf("PyInit__h616\r\n");
+    // printf("PyInit__h616\r\n");
     PyObject *module = NULL;
 
     if ((module = PyModule_Create(&awgpiomodule)) == NULL)
