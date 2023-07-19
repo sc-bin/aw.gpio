@@ -5,12 +5,13 @@ class PWMOut_father:
     _gpio_num = 0
     _chip = 0 
     def __init__(self, pin, *, frequency=500, duty_cycle=0, variable_frequency=False):
+        self._gpio_num = pin.id
         _aw_pwm.switch_chip(self._chip)
 
-        _aw_pwm.set_frequency(pin, frequency)
-        _aw_pwm.set_duty_cycle(pin, duty_cycle)
-        _aw_pwm.start(pin)
-        self._gpio_num = pin
+        _aw_pwm.set_frequency(self._gpio_num, frequency)
+        _aw_pwm.set_duty_cycle(self._gpio_num, duty_cycle)
+        _aw_pwm.start(self._gpio_num)
+        
 
     def __del__(self):
         self.deinit()
