@@ -31,41 +31,43 @@
 #define BLOCK_SIZE 1024
 uint32_t MAP_MASK = 0Xfff;
 
+static int fd_mem = 0;
+uint32_t *mmap_gpio;
 
-static void write_mem_gpio(unsigned int val, unsigned int addr)
+
+void open_fd()
 {
-    int fd_mem = open("/dev/mem", O_RDWR | O_SYNC | O_CLOEXEC);
-    if (fd_mem < 0)
+    if (fd_mem > 0)
+        return;
+    else if (fd_mem == 0)
+    {
+        fd_mem = open("/dev/mem", O_RDWR | O_SYNC | O_CLOEXEC);
+    }
+    else if (fd_mem < 0)
     {
         printf("Failed to open /dev/mem\r\n");
         exit(-1);
     }
+    mmap_gpio = (uint32_t *)mmap(0, BLOCK_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd_mem, MEN_GPIOA_BASE);
+}
+static void write_mem_gpio(unsigned int val, unsigned int addr)
+{
 
-    uint32_t *mmap_gpio = (uint32_t *)mmap(0, BLOCK_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd_mem, MEN_GPIOA_BASE);
-
+    open_fd();
     uint32_t mmap_base = (addr & ~MAP_MASK);
     uint32_t mmap_seek = ((addr - mmap_base) >> 2);
 
     *(mmap_gpio + mmap_seek) = val;
-    close(fd_mem);
 }
 
 static unsigned int read_mem_gpio(unsigned int addr)
 {
-    int fd_mem = open("/dev/mem", O_RDWR | O_SYNC | O_CLOEXEC);
-    if (fd_mem < 0)
-    {
-        printf("Failed to open /dev/mem\r\n");
-        exit(-1);
-    }
 
-    uint32_t *mmap_gpio = (uint32_t *)mmap(0, BLOCK_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd_mem, MEN_GPIOA_BASE);
-
+    open_fd();
     uint32_t val = 0;
     uint32_t mmap_base = (addr & ~MAP_MASK);
     uint32_t mmap_seek = ((addr - mmap_base) >> 2);
     val = *(mmap_gpio + mmap_seek);
-    close(fd_mem);
     return val;
 }
 
@@ -218,23 +220,24 @@ void pin_set_mode(int gpio_num, int mode)
     else
         return;
 }
-int main()
-{
-    pin_set_mode(259, OUTPUT);
-    pin_set_mode(260, INPUT);
 
-    // while (1)
-    // {
-    //     gpio_write(269, 1);
-    //     sleep(1);
-    //     gpio_write(269, 0);
-    //     sleep(1);
-    // }
-    // while (1)
-    // {
-    //     printf("val = %d\r\n", gpio_read(269));
-    //     sleep(1);
-    // }
+// int main()
+// {
+//     pin_set_mode(259, OUTPUT);
+//     pin_set_mode(260, INPUT);
 
-    return 0;
-}
+//     while (1)
+//     {
+//         gpio_write(269, 1);
+//         sleep(1);
+//         gpio_write(269, 0);
+//         sleep(1);
+//     }
+//     // while (1)
+//     // {
+//     //     printf("val = %d\r\n", gpio_read(269));
+//     //     sleep(1);
+//     // }
+
+//     return 0;
+// }

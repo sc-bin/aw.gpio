@@ -6,7 +6,7 @@
 
 static const char moduledocstring[] = "GPIO functionality of allwinner chips using Python";
 
-PyMethodDef h616_methods[] = {
+PyMethodDef pwm_methods[] = {
     {NULL, NULL, 0, NULL},
 };
 static struct PyModuleDef awgpiomodule = {
@@ -14,7 +14,7 @@ static struct PyModuleDef awgpiomodule = {
     "aw._gpio",      // name of module
     moduledocstring, // module documentation, may be NULL
     -1,              // size of per-interpreter state of the module, or -1 if the module keeps state in global variables.
-    h616_methods
+    pwm_methods
 };
 
 

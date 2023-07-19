@@ -46,7 +46,7 @@ static PyObject *py_set_mode(PyObject *self, PyObject *args)
 
 static const char moduledocstring[] = "GPIO functionality of allwinner h616";
 
-PyMethodDef h616_methods[] = {
+PyMethodDef pwm_methods[] = {
     {"write", py_write, METH_VARARGS, "write value to gpio"},
     {"read", py_read, METH_VARARGS, "read value from gpio"},
     {"set_pullUpDn", py_set_PullUpDn, METH_VARARGS, "set the gpio with pullup or pulldown"},
@@ -58,7 +58,7 @@ static struct PyModuleDef awgpiomodule = {
     "aw._h616",      // name of module
     moduledocstring, // module documentation, may be NULL
     -1,              // size of per-interpreter state of the module, or -1 if the module keeps state in global variables.
-    h616_methods};
+    pwm_methods};
 
 // 在import时会被调出来执行
 PyMODINIT_FUNC PyInit__h616(void)
