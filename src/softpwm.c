@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <pthread.h>
 #include <time.h>
+#include <unistd.h>
 
 #include "softpwm.h"
 #include "common.h"
@@ -29,6 +30,8 @@ struct pwm
     int freq;
     int dutycycle;
 
+    unsigned int cycle_high;
+    unsigned int cycle_low;
     struct timespec req_on, req_off;
     int running;
     struct pwm *next;
@@ -65,6 +68,7 @@ void remove_pwm(unsigned int gpio)
     }
 }
 #define NS_1S 1000000000
+#define US_1S 1000000
 
 void calculate_times(struct pwm *p)
 {
@@ -74,24 +78,46 @@ void calculate_times(struct pwm *p)
     // printf("freq=%d\r\n", p->freq);
     // printf("dutycycle=%d\r\n", p->dutycycle);
 
-    full_cycle = NS_1S / p->freq;
-    cycle_high = full_cycle / 1000 * p->dutycycle;
-    cycle_low = full_cycle - cycle_high;
+    full_cycle = US_1S / p->freq;
+    p->cycle_high = full_cycle / 1000 * p->dutycycle;
+    p->cycle_low  = full_cycle - cycle_high;
 
-    p->req_on.tv_sec = 0;
-    p->req_on.tv_nsec = (long)cycle_high;
+    // p->req_on.tv_sec = 0;
+    // p->req_on.tv_nsec = (long)cycle_high;
 
-    p->req_off.tv_sec = 0;
-    p->req_off.tv_nsec = (long)cycle_low;
+    // p->req_off.tv_sec = 0;
+    // p->req_off.tv_nsec = (long)cycle_low;
 }
+// void calculate_times(struct pwm *p)
+// {
+//     long long usec;
+
+//     int full_cycle, cycle_high, cycle_low;
+//     // printf("freq=%d\r\n", p->freq);
+//     // printf("dutycycle=%d\r\n", p->dutycycle);
+
+//     full_cycle = NS_1S / p->freq;
+//     cycle_high = full_cycle / 1000 * p->dutycycle;
+//     cycle_low = full_cycle - cycle_high;
+
+//     p->req_on.tv_sec = 0;
+//     p->req_on.tv_nsec = (long)cycle_high;
+
+//     p->req_off.tv_sec = 0;
+//     p->req_off.tv_nsec = (long)cycle_low;
+// }
 
 void full_sleep(struct timespec *req)
 {
     struct timespec rem = {0};
 
     if (nanosleep(req, &rem) == -1)
+    {
+        printf("nanosleep(req, &rem) == -1");
         full_sleep(&rem);
-}
+    }
+        usleep(100);
+}   
 
 void *pwm_thread(void *threadarg)
 {
@@ -102,13 +128,17 @@ void *pwm_thread(void *threadarg)
         if (p->dutycycle > 0)
         {
             gpio_out(p->gpio, 1);
-            full_sleep(&p->req_on);
+            
+            usleep(p->cycle_high);
+            // full_sleep(&p->req_on);
         }
 
         if (p->dutycycle < 1000)
         {
             gpio_out(p->gpio, 0);
-            full_sleep(&p->req_off);
+            usleep(p->cycle_low);
+
+            // full_sleep(&p->req_off);
         }
     }
     gpio_out(p->gpio, 0);
