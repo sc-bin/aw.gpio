@@ -3,6 +3,16 @@
 #include "h616_gpio.h"
 #include "common.h"
 
+
+static PyObject *py_switch_chip(PyObject *self, PyObject *args)
+{
+    int ret;
+    int flag;
+    ret = PyArg_ParseTuple(args, "i", &flag);
+    switch_chip( flag);
+    Py_RETURN_NONE;
+}
+
 static PyObject *py_set_duty_cycle(PyObject *self, PyObject *args)
 {
     int ret;
@@ -19,6 +29,26 @@ static PyObject *py_set_frequency(PyObject *self, PyObject *args)
     pwm_set_frequency(gpio_num, freq);
     Py_RETURN_NONE;
 }
+
+static PyObject *py_get_duty_cycle(PyObject *self, PyObject *args)
+{
+    int ret;
+    int gpio_num;
+    ret = PyArg_ParseTuple(args, "i", &gpio_num);
+    return Py_BuildValue("i", pwm_get_duty_cycle(gpio_num));
+}
+
+static PyObject *py_get_frequency(PyObject *self, PyObject *args)
+{
+    int ret;
+    int gpio_num;
+    ret = PyArg_ParseTuple(args, "i", &gpio_num);
+    return Py_BuildValue("i", pwm_get_frequency(gpio_num));
+}
+
+
+
+
 static PyObject *py_start(PyObject *self, PyObject *args)
 {
     int ret;
@@ -47,6 +77,9 @@ static PyObject *py_exists(PyObject *self, PyObject *args)
 static const char moduledocstring[] = "soft pwm";
 
 PyMethodDef pwm_methods[] = {
+    {"switch_chip", py_switch_chip, METH_VARARGS, "switch chip"},
+    {"get_duty_cycle", py_get_duty_cycle, METH_VARARGS, "get_duty_cycle with gpio num"},
+    {"get_frequency", py_get_frequency, METH_VARARGS, "get_frequency with gpio num"},
     {"set_duty_cycle", py_set_duty_cycle, METH_VARARGS, "set_duty_cycle with gpio num"},
     {"set_frequency", py_set_frequency, METH_VARARGS, "set_frequency with gpio num"},
     {"start", py_start, METH_VARARGS, "start pwm output"},

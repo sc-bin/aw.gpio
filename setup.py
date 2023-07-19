@@ -19,7 +19,8 @@ setup(
     url="https://github.com/sc-bin/aw.gpio", 
     packages=['aw','aw.gpio'],
     ext_modules = [Extension('aw._gpio', ['src/init.c']),
-                   Extension('aw._h616', ['src/h616_gpio.c', 'src/h616_py.c', 'src/common_py.c']),
+                   Extension('aw._common', ['src/common_py_pravite.c']),
+                   Extension('aw._h616', ['src/h616_gpio.c', 'src/h616_py.c', 'src/common.c']),
                    Extension('aw._pwm', ['src/softpwm.c', 'src/softpwm_py.c',  'src/h616_gpio.c']),
                    ],
 

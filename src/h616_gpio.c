@@ -71,7 +71,7 @@ static unsigned int read_mem_gpio(unsigned int addr)
     return val;
 }
 
-void gpio_write(int pin, int value)
+void H616_gpio_write(int pin, int value)
 {
     unsigned int bank = pin >> 5;
     unsigned int index = pin - (bank << 5);
@@ -100,7 +100,7 @@ void gpio_write(int pin, int value)
     }
 }
 
-int gpio_read(int gpio_num)
+int H616_gpio_read(int gpio_num)
 {
 
     int bank = gpio_num >> 5;
@@ -123,7 +123,7 @@ int gpio_read(int gpio_num)
     return 0;
 }
 
-void gpio_set_PullUpDn(int gpio_num, int pud)
+void H616_gpio_set_PullUpDn(int gpio_num, int pud)
 {
     unsigned int regval = 0;
     unsigned int bank = gpio_num >> 5;
@@ -139,11 +139,11 @@ void gpio_set_PullUpDn(int gpio_num, int pud)
         bit_value = SUNXI_PUD_OFF;
         break;
     case PUD_UP:
-        pin_set_mode(gpio_num, 0);
+        H616_pin_set_mode(gpio_num, 0);
         bit_value = SUNXI_PUD_UP;
         break;
     case PUD_DOWN:
-        pin_set_mode(gpio_num, 0);
+        H616_pin_set_mode(gpio_num, 0);
         bit_value = SUNXI_PUD_DOWN;
         break;
     default:
@@ -174,7 +174,7 @@ void gpio_set_PullUpDn(int gpio_num, int pud)
     write_mem_gpio(regval, phyaddr);
     regval = read_mem_gpio(phyaddr);
 }
-void pin_set_mode(int gpio_num, int mode)
+void H616_pin_set_mode(int gpio_num, int mode)
 {
     unsigned int regval = 0;
     unsigned int bank = gpio_num >> 5;
@@ -204,7 +204,7 @@ void pin_set_mode(int gpio_num, int mode)
         regval &= ~(7 << offset);
         write_mem_gpio(regval, phyaddr);
         regval = read_mem_gpio(phyaddr);
-        gpio_set_PullUpDn(gpio_num, PUD_OFF);
+        H616_gpio_set_PullUpDn(gpio_num, PUD_OFF);
         return;
     }
     else if (mode == OUTPUT)
@@ -223,19 +223,19 @@ void pin_set_mode(int gpio_num, int mode)
 
 // int main()
 // {
-//     pin_set_mode(259, OUTPUT);
-//     pin_set_mode(260, INPUT);
+//     H616_pin_set_mode(259, OUTPUT);
+//     H616_pin_set_mode(260, INPUT);
 
 //     while (1)
 //     {
-//         gpio_write(269, 1);
+//         H616_gpio_write(269, 1);
 //         sleep(1);
-//         gpio_write(269, 0);
+//         H616_gpio_write(269, 0);
 //         sleep(1);
 //     }
 //     // while (1)
 //     // {
-//     //     printf("val = %d\r\n", gpio_read(269));
+//     //     printf("val = %d\r\n", H616_gpio_read(269));
 //     //     sleep(1);
 //     // }
 

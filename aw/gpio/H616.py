@@ -1,9 +1,12 @@
-from src.pin import *
-
+from src.pin import PIN_father as _PIN
+from src.pwm import PWMOut_father as _PWM
 import aw._h616 as _gpio
+import aw._common as _common
 
+class Pwm(_PWM):
+    _chip = _common.CHIP_H616
 
-class Pin(PIN_father):
+class Pin(_PIN):
 
     # self.setup(self.id, self.IN, pull_up_down=self.PUD_UP)
     def _setup(self, gpio_num, dir, pull_up_down=None ):

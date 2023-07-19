@@ -5,12 +5,24 @@
 #include <time.h>
 
 #include "softpwm.h"
-// #include "common.h"
+#include "common.h"
 #include "h616_gpio.h"
 
 // 不同芯片的寄存器不同，write函数也不一样
-void (*gpio_out)(int, int);
+void (*gpio_out)(int, int) = H616_gpio_write;
+void switch_chip(int flag)
+{
+    switch (flag)
+    {
+    case CHIP_H616:
+        gpio_out = H616_gpio_write;
 
+        break;
+
+    default:
+        break;
+    }
+}
 struct pwm
 {
     unsigned int gpio;
@@ -59,20 +71,18 @@ void calculate_times(struct pwm *p)
     long long usec;
 
     int full_cycle, cycle_high, cycle_low;
+    // printf("freq=%d\r\n", p->freq);
+    // printf("dutycycle=%d\r\n", p->dutycycle);
+
     full_cycle = NS_1S / p->freq;
-    cycle_high = full_cycle / 1000 * p->dutycycle ;
+    cycle_high = full_cycle / 1000 * p->dutycycle;
     cycle_low = full_cycle - cycle_high;
 
-    // printf("full_cycle=%d\r\n", full_cycle);
-    // printf("cycle_high=%d\r\n", cycle_high);
-    // printf("cycle_low=%d\r\n", cycle_low);
     p->req_on.tv_sec = 0;
-    // p->req_on.tv_sec = (int)(cycle_high / NS_1S);
     p->req_on.tv_nsec = (long)cycle_high;
 
     p->req_off.tv_sec = 0;
-    // p->req_off.tv_sec = (int)(cycle_high / NS_1S);
-    p->req_off.tv_nsec = (long)cycle_low ;
+    p->req_off.tv_nsec = (long)cycle_low;
 }
 
 void full_sleep(struct timespec *req)
@@ -89,25 +99,20 @@ void *pwm_thread(void *threadarg)
     // printf("pwm_thread\r\n");
     while (p->running)
     {
-        // printf(".\r\n");
-
         if (p->dutycycle > 0)
         {
             gpio_out(p->gpio, 1);
-            // output_gpio(p->gpio, 1);
             full_sleep(&p->req_on);
         }
 
         if (p->dutycycle < 1000)
         {
             gpio_out(p->gpio, 0);
-            // output_gpio(p->gpio, 0);
             full_sleep(&p->req_off);
         }
     }
     gpio_out(p->gpio, 0);
     // clean up
-    // output_gpio(p->gpio, 0);
     free(p);
     pthread_exit(NULL);
 }
@@ -120,7 +125,6 @@ struct pwm *add_new_pwm(unsigned int gpio)
     new_pwm->gpio = gpio;
     new_pwm->running = 0;
     new_pwm->next = NULL;
-    // default to 1 kHz frequency, dutycycle 0.0
     new_pwm->freq = 1000;
     new_pwm->dutycycle = 500;
 
@@ -153,13 +157,27 @@ struct pwm *find_pwm(unsigned int gpio)
     return NULL;
 }
 
+int pwm_get_duty_cycle(unsigned int gpio)
+{
+    struct pwm *p;
+
+    if ((p = find_pwm(gpio)) != NULL)
+        return p->dutycycle;
+    return -1;
+}
+int pwm_get_frequency(unsigned int gpio)
+{
+    struct pwm *p;
+
+    if ((p = find_pwm(gpio)) != NULL)
+        return p->freq;
+    return -1;
+}
 void pwm_set_duty_cycle(unsigned int gpio, int dutycycle)
 {
     struct pwm *p;
 
-    // printf("gpio=%d\r\n", gpio);
-    // printf("dutycycle=%d\r\n", dutycycle);
-    if (dutycycle < 0 || dutycycle > 100)
+    if (dutycycle < 0 || dutycycle > 1000)
     {
         // btc fixme - error
         return;
@@ -175,8 +193,6 @@ void pwm_set_duty_cycle(unsigned int gpio, int dutycycle)
 void pwm_set_frequency(unsigned int gpio, int freq)
 {
     struct pwm *p;
-    // printf("gpio=%d\r\n", gpio);
-    // printf("freq=%d\r\n", freq);
     if (freq <= 0) // to avoid divide by zero
     {
         // btc fixme - error
@@ -194,8 +210,6 @@ void pwm_start(unsigned int gpio)
 {
     pthread_t threads;
     struct pwm *p;
-
-    gpio_out = gpio_write;
 
     if (((p = find_pwm(gpio)) == NULL) || p->running)
         return;
@@ -236,7 +250,7 @@ int pwm_exists(unsigned int gpio)
 
 // int main()
 // {
-//     gpio_out = gpio_write;
+//     gpio_out = H616_gpio_write;
 //     pwm_set_duty_cycle(270, 1);
 //     pwm_set_frequency(270, 1000);
 //     pwm_start(270);
