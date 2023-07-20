@@ -1,4 +1,5 @@
 import aw._pwm as _aw_pwm
+import aw.gpio as _gpio
 
 class PWMOut_father:
     """Base Pulse Width Modulation Output Class"""
@@ -6,8 +7,9 @@ class PWMOut_father:
     _chip = 0 
     def __init__(self, pin, *, frequency=500, duty_cycle=0, variable_frequency=False):
         self._gpio_num = pin.id
-        _aw_pwm.switch_chip(self._chip)
 
+        pin.init(pin.OUT)
+        _aw_pwm.switch_chip(self._chip)
         _aw_pwm.set_frequency(self._gpio_num, frequency)
         _aw_pwm.set_duty_cycle(self._gpio_num, duty_cycle)
         _aw_pwm.start(self._gpio_num)
@@ -32,7 +34,7 @@ class PWMOut_father:
         
     @duty_cycle.setter
     def duty_cycle(self, duty_cycle):
-        _aw_pwm.set_duty_cycle(self._gpio_num, duty_cycle)
+        _aw_pwm.set_duty_cycle(self._gpio_num, int(duty_cycle))
 
     @property
     def frequency(self):
@@ -40,5 +42,5 @@ class PWMOut_father:
 
     @frequency.setter
     def frequency(self, frequency):
-        _aw_pwm.set_frequency(self._gpio_num, frequency)
+        _aw_pwm.set_frequency(self._gpio_num, int(frequency))
 

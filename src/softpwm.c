@@ -3,11 +3,14 @@
 #include <stdio.h>
 #include <pthread.h>
 #include <time.h>
-#include <unistd.h>
+#include <signal.h>
 
 #include "softpwm.h"
 #include "common.h"
 #include "h616_gpio.h"
+
+#define NS_1S 1000000000
+#define DUTY_CYCLE_FULL 65535
 
 // 不同芯片的寄存器不同，write函数也不一样
 void (*gpio_out)(int, int) = H616_gpio_write;
@@ -67,8 +70,7 @@ void remove_pwm(unsigned int gpio)
         }
     }
 }
-#define NS_1S 1000000000
-#define US_1S 1000000
+
 
 void calculate_times(struct pwm *p)
 {
@@ -78,35 +80,18 @@ void calculate_times(struct pwm *p)
     // printf("freq=%d\r\n", p->freq);
     // printf("dutycycle=%d\r\n", p->dutycycle);
 
-    full_cycle = US_1S / p->freq;
-    p->cycle_high = full_cycle / 1000 * p->dutycycle;
-    p->cycle_low  = full_cycle - cycle_high;
+    full_cycle = NS_1S / p->freq;
+    cycle_high = full_cycle / DUTY_CYCLE_FULL * p->dutycycle;
+    cycle_low = full_cycle - cycle_high;
 
-    // p->req_on.tv_sec = 0;
-    // p->req_on.tv_nsec = (long)cycle_high;
+    // printf("cycle_high=%d\r\n", cycle_high);
+    // printf("cycle_low=%d\r\n", cycle_low);
+    p->req_on.tv_sec = 0;
+    p->req_on.tv_nsec = (long)cycle_high;
 
-    // p->req_off.tv_sec = 0;
-    // p->req_off.tv_nsec = (long)cycle_low;
+    p->req_off.tv_sec = 0;
+    p->req_off.tv_nsec = (long)cycle_low;
 }
-// void calculate_times(struct pwm *p)
-// {
-//     long long usec;
-
-//     int full_cycle, cycle_high, cycle_low;
-//     // printf("freq=%d\r\n", p->freq);
-//     // printf("dutycycle=%d\r\n", p->dutycycle);
-
-//     full_cycle = NS_1S / p->freq;
-//     cycle_high = full_cycle / 1000 * p->dutycycle;
-//     cycle_low = full_cycle - cycle_high;
-
-//     p->req_on.tv_sec = 0;
-//     p->req_on.tv_nsec = (long)cycle_high;
-
-//     p->req_off.tv_sec = 0;
-//     p->req_off.tv_nsec = (long)cycle_low;
-// }
-
 void full_sleep(struct timespec *req)
 {
     struct timespec rem = {0};
@@ -127,18 +112,20 @@ void *pwm_thread(void *threadarg)
     {
         if (p->dutycycle > 0)
         {
+            // printf("-");
             gpio_out(p->gpio, 1);
             
-            usleep(p->cycle_high);
-            // full_sleep(&p->req_on);
+            // usleep(p->cycle_high);
+            full_sleep(&p->req_on);
         }
 
-        if (p->dutycycle < 1000)
+        if (p->dutycycle < DUTY_CYCLE_FULL)
         {
+            // printf("+");
             gpio_out(p->gpio, 0);
-            usleep(p->cycle_low);
+            // usleep(p->cycle_low);
 
-            // full_sleep(&p->req_off);
+            full_sleep(&p->req_off);
         }
     }
     gpio_out(p->gpio, 0);
@@ -207,7 +194,7 @@ void pwm_set_duty_cycle(unsigned int gpio, int dutycycle)
 {
     struct pwm *p;
 
-    if (dutycycle < 0 || dutycycle > 1000)
+    if (dutycycle < 0 || dutycycle > DUTY_CYCLE_FULL)
     {
         // btc fixme - error
         return;
