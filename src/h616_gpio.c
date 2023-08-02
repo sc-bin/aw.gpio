@@ -38,12 +38,15 @@ uint32_t *mmap_gpio;
 void open_fd()
 {
     if (fd_mem > 0)
+    {
+        printf("fd_mem >0");
         return;
+    }
     else if (fd_mem == 0)
     {
         fd_mem = open("/dev/mem", O_RDWR | O_SYNC | O_CLOEXEC);
     }
-    else if (fd_mem < 0)
+    if (fd_mem < 0)
     {
         printf("Failed to open /dev/mem\r\n");
         exit(-1);
@@ -189,9 +192,10 @@ void H616_pin_set_mode(int gpio_num, int mode)
     }
     else
         phyaddr = MEN_GPIOA_BASE + (bank * 36) + ((index >> 3) << 2);
-
+    
+    printf("read_mem_gpio\r\n");
     regval = read_mem_gpio(phyaddr);
-
+    printf("reg=%x\r\n", regval);
     if (-1 == gpio_num)
     {
         printf("[%s:L%d] the pin:%d is invaild,please check it over!\n",
@@ -201,6 +205,7 @@ void H616_pin_set_mode(int gpio_num, int mode)
 
     if (mode == INPUT)
     {
+
         regval &= ~(7 << offset);
         write_mem_gpio(regval, phyaddr);
         regval = read_mem_gpio(phyaddr);
