@@ -59,26 +59,21 @@ class PIN_father:
                 pass
             else:
                 raise RuntimeError("Invalid pull for pin: %s" % self.id)
-
-    @property
-    def value(self):
-        return self._input(self.id)
-    
-    @value.setter
+            
     def value(self, val=None):
-        """Set or return the Pin Value"""
-        if val == self.LOW:
-            self._value = val
-            # GPIO.output(self.id, val)
-            self._output(self.id, val)
+            """Set or return the Pin Value"""
+            if val is not None:
+                if val == self.LOW:
+                    self._value = val
+                    # GPIO.output(self.id, val)
+                    self._output(self.id, val)
 
-        elif val == self.HIGH:
-            self._value = val
-            # GPIO.output(self.id, val)
-            self._output(self.id, val)
+                elif val == self.HIGH:
+                    self._value = val
+                    # GPIO.output(self.id, val)
+                    self._output(self.id, val)
 
-        else:
-            raise RuntimeError("Invalid value for pin")
-        return None
-        
-        # return GPIO.input(self.id)
+                else:
+                    raise RuntimeError("Invalid value for pin")
+                return None
+            return self._input(self.id)

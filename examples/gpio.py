@@ -8,7 +8,7 @@ led.init(led.OUT)
 
 while True:
     time.sleep(0.1)
-    if key.value == 0:
-        led.value = 1
+    if key.value() == 0:
+        led.value(1)
     else:
-        led.value = 0
+        led.value(0)

@@ -23,9 +23,9 @@ from aw.gpio.H616 import *
 import time
 PC13.init(PC13.OUT)
 while True:
-    PC13.value = 1
+    PC13.value(1)
     time.sleep(1)
-    PC13.value = 0
+    PC13.value(0)
     time.sleep(1)
 ```
 读取PC12引脚电平，并控制PC13引脚电平 ↓
@@ -38,10 +38,10 @@ key.init(key.IN,key.PULL_UP)
 led.init(led.OUT)
 while True:
     time.sleep(0.1)
-    if key.value == 0:
-        led.value = 1
+    if key.value():
+        led.value(1)
     else:
-        led.value = 0
+        led.value(0)
 ```
 pwm
 ------
