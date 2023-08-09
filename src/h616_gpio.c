@@ -39,7 +39,7 @@ void open_fd()
 {
     if (fd_mem > 0)
     {
-        printf("fd_mem >0");
+        // printf("fd_mem >0");
         return;
     }
     else if (fd_mem == 0)
