@@ -193,9 +193,7 @@ void H616_pin_set_mode(int gpio_num, int mode)
     else
         phyaddr = MEN_GPIOA_BASE + (bank * 36) + ((index >> 3) << 2);
     
-    printf("read_mem_gpio\r\n");
     regval = read_mem_gpio(phyaddr);
-    printf("reg=%x\r\n", regval);
     if (-1 == gpio_num)
     {
         printf("[%s:L%d] the pin:%d is invaild,please check it over!\n",

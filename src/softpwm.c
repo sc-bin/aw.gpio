@@ -98,7 +98,7 @@ void full_sleep(struct timespec *req)
 
     if (nanosleep(req, &rem) == -1)
     {
-        printf("nanosleep(req, &rem) == -1");
+        // printf("nanosleep(req, &rem) == -1");
         full_sleep(&rem);
     }
         usleep(100);
